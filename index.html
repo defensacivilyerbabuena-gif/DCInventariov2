@@ -8,20 +8,24 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              dcRed: '#D32F2F',
-              dcDarkRed: '#B71C1C',
-              dcYellow: '#FFC107',
-              dcAmber: '#FFCA28',
-            },
-            fontFamily: {
-              sans: ['Roboto', 'sans-serif'],
+      if (typeof tailwind !== 'undefined') {
+        tailwind.config = {
+          theme: {
+            extend: {
+              colors: {
+                dcRed: '#D32F2F',
+                dcDarkRed: '#B71C1C',
+                dcYellow: '#FFC107',
+                dcAmber: '#FFCA28',
+              },
+              fontFamily: {
+                sans: ['Roboto', 'sans-serif'],
+              }
             }
           }
         }
+      } else {
+        console.warn('Tailwind CSS CDN failed to load or is not yet available.');
       }
     </script>
     <style>
