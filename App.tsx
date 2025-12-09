@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { User, UserRole, ViewState } from './types';
 import { supabase } from './integrations/supabase/client';
 import { 
@@ -11,16 +11,20 @@ import {
   LogOut, 
   User as UserIcon,
   Plus,
-  Users
+  Users,
+  Loader2
 } from 'lucide-react';
 import { Login } from './pages/Login';
 import { InventoryScreen } from './components/InventoryScreen';
 import { RequestsScreen } from './components/RequestsScreen';
-import { AIAssistantScreen } from './components/AIAssistantScreen';
 import { UserManagementScreen } from './components/UserManagementScreen';
 import { DYCLogo } from './components/DYCLogo';
 
+// Lazy load AI Assistant to prevent blocking on load if dependencies fail
+const AIAssistantScreen = React.lazy(() => import('./components/AIAssistantScreen').then(module => ({ default: module.AIAssistantScreen })));
+
 const App: React.FC = () => {
+  console.log("App Component Rendering...");
   const [user, setUser] = useState<User | null>(null);
   const [currentView, setCurrentView] = useState<ViewState>('LOGIN');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -39,6 +43,10 @@ const App: React.FC = () => {
         setLoading(false);
         setCurrentView('LOGIN');
       }
+    }).catch(err => {
+      console.error("Error checking session:", err);
+      setLoading(false);
+      setCurrentView('LOGIN');
     });
 
     // Listen for auth changes
@@ -240,7 +248,11 @@ const App: React.FC = () => {
           {currentView === 'INVENTORY' && <InventoryScreen user={user!} onRefresh={refreshData} key={inventoryHash} />}
           {currentView === 'REQUESTS' && <RequestsScreen user={user!} onRefresh={refreshData} key={inventoryHash} />}
           {currentView === 'USERS' && user?.role === UserRole.ADMIN && <UserManagementScreen currentUser={user} />}
-          {currentView === 'AI_ASSISTANT' && <AIAssistantScreen />}
+          {currentView === 'AI_ASSISTANT' && (
+            <Suspense fallback={<div className="flex items-center justify-center h-64"><Loader2 className="w-8 h-8 animate-spin text-dcRed" /></div>}>
+              <AIAssistantScreen />
+            </Suspense>
+          )}
         </div>
       </main>
     </div>
